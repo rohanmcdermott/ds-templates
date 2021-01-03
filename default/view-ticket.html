@@ -1,4 +1,4 @@
-{% extends "store/default/base.html" %}
+{% extends "store/verve/base.html" %}
 
 {% block title %}{{ webstore.name }} | {{ language.translations.view_support_ticket }}{% endblock %}
 
@@ -9,7 +9,7 @@
 
 {% block content %}
 
-    {% include 'store/default/nav.html' %}
+    {% include 'store/verve/nav.html' %}
 
     <!-- Break -->
     <br/>
@@ -107,6 +107,6 @@
     </div>
     <!-- End Main Login Content -->
 
-    {% include 'store/default/footer.html' %}
+    {% include 'store/verve/footer.html' %}
 
 {% endblock %}

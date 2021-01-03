@@ -1,4 +1,4 @@
-{% extends 'store/default/base.html' %}
+{% extends 'store/verve/base.html' %}
 
 {% block title %}{{ webstore.name }} | Welcome{% endblock %}
 
@@ -11,22 +11,106 @@
 
 {% load currency %}
 
-{% include 'store/default/nav.html' %}
+{% include 'store/verve/nav.html' %}
 
-    <!-- Break -->
-    <br/>
+<!-- Break -->
+<br />
 
-    <!-- Home Page Content -->
-    <div class="container">
-        {# Messages to the user #}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" role="alert">
-                    {{ message }}
+
+
+
+<div class="decus-wrapper home-page">
+    {% include 'store/verve/rohan-nav.html' %}
+
+    <div class="body">
+    {# Messages to the user #}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+        <div class="content decus-index">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{ language.translations.welcome_to_the }} {{ webstore.name }} {{ language.translations.store }}</div>
+                <div class="panel-body">
+                    {{ webstore.homepage_message|safe }}
+
                 </div>
+            </div>
+        </div>
+        <div class="index-sidebar">
+
+
+            {% is_logged_in webstore as logged_in %}
+            {% if logged_in %}
+            {% get_user webstore as logged_in_user %}
+
+            <div class="panel panel-default module decus-user-module">
+                <div class="decus-user-module-container">
+                    <div class="user">
+                        <div class="decus-avatar">
+                            <img src="https://minotar.net/avatar/{{ logged_in_user.username }}/32" />
+                        </div>
+                        <div>
+                            <p class="shopping-as">Shopping as</p>
+                            <a href="/logout" class="a-concealed toggle-tooltip" data-original-title="Log out">
+                                <p class="decus-username">{{ logged_in_user.username }}</p>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="cart-prompt" data-micromodal-trigger="cart-modal" data-badge="{% for item in cart %}{{ item.quantity }}{% endfor %}">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+
+
+            <div class="panel panel-default module decus-user-module">
+                <div class="decus-user-module-container">
+                    <div class="user">
+                        <div class="decus-avatar">
+                            <img src="https://minotar.net/avatar/steve/32" />
+                        </div>
+                        <div>
+                            <p class="shopping-as">Shopping as</p>
+                            <a class="a-concealed toggle-tooltip" data-original-title="Add an item to login">
+                                <p class="decus-username">Guest</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endif %}
+
+
+{% for module in modules %}
+            {% if module.on_homepage %}
+            {% include module|template %}
+            {% endif %}
             {% endfor %}
-        {% endif %}
-        <div class="row">
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- Home Page Content -->
+<div class="container">
+
+    <div class="row">
+        <!--
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
@@ -37,28 +121,35 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                {% if webstore.support_tickets %}
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <p class="lead">{{ language.translations.need_support }}
-                            <hr/>{{ language.translations.contact_us_by_support }}
-                            </p>
-                            <a href="/support" class="btn btn-secondary btn-block">{{ language.translations.let_me_open_a_support_ticket }}</a>
-                        </div>
-                    </div>
-                {% endif %}
-                <br/>
-                {% for module in modules %}
-                    {% if module.on_homepage %}
-                        {% include module|template %}
-                    {% endif %}
-                {% endfor %}
+-->
+        <div class="col-md-4">
+<!--
+            {% if webstore.support_tickets %}
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <p class="lead">{{ language.translations.need_support }}
+                        <hr />{{ language.translations.contact_us_by_support }}
+                    </p>
+                    <a href="/support" class="btn btn-secondary btn-block">{{ language.translations.let_me_open_a_support_ticket }}</a>
+                </div>
             </div>
+            {% endif %}
+            <br />
+-->
+
         </div>
     </div>
-    <!-- End Home Page Content -->
+</div>
 
-    {% include 'store/default/footer.html' %}
+
+
+
+<!-- End Home Page Content -->
+
+
+
+
+
+{% include 'store/verve/footer.html' %}
 
 {% endblock %}

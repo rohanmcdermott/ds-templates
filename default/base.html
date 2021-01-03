@@ -1,26 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>{% block title %}{% endblock %}</title>
     {% load static %}
+    {% load config %}
     {% load currency %}
+    {% load cart %}
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" type="text/css" href="/static/default/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/default/css/default.css">
+    <!--    <link rel="stylesheet" type="text/css" href="/static/edit/css/bootstrap.min.css">-->
+    <!--    <link rel="stylesheet" type="text/css" href="/static/edit/css/default.css">-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.rohanmcdermott.com/sites/donationstore/verve/css/normalise.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.rohanmcdermott.com/sites/donationstore/verve/css/rohan.css">
 
     <link rel="icon" href="{{ webstore.favicon }}">
 
     <script src='https://www.google.com/recaptcha/api.js'></script>
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/micromodal@0.4.2/dist/micromodal.min.js" integrity="sha256-PqiFpvu2HsnOnyZqaH8tYA9wJrlyxK4nNR7sPpzzev4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
 
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
     <script src="https://js.stripe.com/v3/"></script>
 
+    <!--CUSTOM-->
+
+    {% get_config as webstore_config %}
+
+    {% if webstore_config.style %}
+    <style>
+        :root {
+    --primary5: {{ webstore_config.style.primary }};
+            }
+#header {
+    background-image: url('{{ webstore_config.style.headerImg }}');
+}
+        </style>
+    {% endif %}
+
 </head>
-<body>
-{% block content %}{% endblock content %}
-{% if stripe_gateway %}
+
+<body data-layout="3">
+    {% block content %}{% endblock content %}
+    {% if stripe_gateway %}
     <script>
         // Create a Stripe client.
         var stripe = Stripe('{{ stripe_gateway.publishable_key }}');
@@ -99,6 +123,7 @@
                         var displayError = document.getElementById('card-errors');
 
                         displayError.textContent = result.error;
+                        console.log(result.error.message);
                     } else {
                         if (result.paymentIntent.status === 'succeeded') {
                             window.location.replace('/payment-complete');
@@ -111,22 +136,390 @@
             }
         });
     </script>
-{% endif %}
+    {% endif %}
+    <div class="modal micromodal-slide" id="decus-modal" aria-hidden="true"></div>
+
+
+    {% is_logged_in webstore as logged_in %}
+    {% if logged_in %}
+    {% get_user webstore as logged_in_user %}
+    {% if cart %}
+
+
+
+
+    <div class="modal micromodal-slide" id="cart-modal" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+            <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+                <header class="modal__header">
+                    <div class="cartModal-meta">
+                        <div class="decus-avatar">
+                            <img src="https://minotar.net/avatar/{{ logged_in_user.username }}/32" alt="avatar" />
+                        </div>
+
+                        <div class="info">
+                            <p class="decus-username">{{ logged_in_user.username }}'s Cart</p>
+                            <div class="decus-cart-short">
+                                <p class="cart-short"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cartModal-actions">
+                        <a href="/logout" class="log-out" rel="noopener noreferrer">Log out</a>
+                        <div class="currency-selector">
+                            <a type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+                                {% if request.session.chosen_currency %} {{ request.session.chosen_currency }}{% else %}{{ webstore.currency }}{% endif %} <span class="fa fa-caret-down"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="/currency/AUD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'AUD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}AUD</a></li>
+                                <li><a href="/currency/BRL?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'BRL' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}BRL</a></li>
+                                <li><a href="/currency/CAD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CAD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CAD</a></li>
+                                <li><a href="/currency/CHF?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CHF' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CHF</a></li>
+                                <li><a href="/currency/CNY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CNY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CNY</a></li>
+                                <li><a href="/currency/CZK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CZK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CZK</a></li>
+                                <li><a href="/currency/DKK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'DKK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}DKK</a></li>
+                                <li><a href="/currency/EUR?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'EUR' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}EUR</a></li>
+                                <li><a href="/currency/GBP?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'GBP' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}GBP</a></li>
+                                <li><a href="/currency/HKD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'HKD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}HKD</a></li>
+                                <li><a href="/currency/HUF?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'HUF' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}HUF</a></li>
+                                <li><a href="/currency/ILS?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'ILS' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}ILS</a></li>
+                                <li><a href="/currency/JPY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'JPY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}JPY</a></li>
+                                <li><a href="/currency/MXN?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'MXN' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}MXN</a></li>
+                                <li><a href="/currency/MYR?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'MYR' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}MYR</a></li>
+                                <li><a href="/currency/NOK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'NOK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}NOK</a></li>
+                                <li><a href="/currency/NZD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'NZD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}NZD</a></li>
+                                <li><a href="/currency/PHP?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'PHP' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}PHP</a></li>
+                                <li><a href="/currency/PLN?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'PLN' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}PLN</a></li>
+                                <li><a href="/currency/RUB?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'RUB' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}RUB</a></li>
+                                <li><a href="/currency/SEK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'SEK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}SEK</a></li>
+                                <li><a href="/currency/SGD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'SGD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}SGD</a></li>
+                                <li><a href="/currency/THB?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'THB' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}THB</a></li>
+                                <li><a href="/currency/TRY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'TRY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}TRY</a></li>
+                                <li><a href="/currency/USD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'USD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}USD</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="modal__content" id="cart-modal-content">
+                    <ul class="cartModal-items">
+
+                        {% for cart_item in cart_items %}
+
+                        <li class="cartModal-item">
+                            <div class="itemName">{{ cart_item.package.name }} <small>X {{ cart_item.quantity }}</small></div>
+                            <div class="right">
+                                <p class="price"> {% if cart_item.package.allow_customer_change_price %}
+                                    {% get_price_using_currency cart_item.customers_price webstore %}
+                                    {% else %}
+                                    {% get_price_using_currency cart_item.package.price webstore %}
+                                    {% endif %}</p>
+                                <div class="item-actions">
+                                    <a class="cartModal-remove" href="/checkout/packages/remove/2423998"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
+                        </li>
+
+                        {% endfor %}
+
+
+                        {% for item in cart %}
+                        {{ item.id }}
+                        {{ item.quantity }}
+                        {{ cart_total }}
+
+
+
+                        <li class="cartModal-item">
+                            <div class="itemName">{{ item.id }} <small class="quantity">X {{ item.quantity }}</small></div>
+                            <div class="right">
+                                <p class="price"> {{ cart_total }}</p>
+                                <div class="item-actions">
+                                    <a class="cartModal-remove" href="/checkout/packages/remove/2423998"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+
+
+
+                    </ul>
+                </main>
+
+                <footer class="modal__footer">
+                    <span class="cartModal-continue-shopping" data-micromodal-close aria-label="Close this dialog window">Continue Shopping</span>
+                    <a href=/checkout class="checkout-btn btn btn-primary">Proceed to Checkout <i class="fas fa-arrow-right"></i></a>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+
+    {% else %}
+
+    <div class="modal micromodal-slide decus-cart-empty" id="cart-modal" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+            <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+                <header class="modal__header">
+                    <div class="cartModal-meta">
+                        <div class="decus-avatar">
+                            <img src="https://minotar.net/avatar/{{ logged_in_user.username }}/32" alt="avatar" />
+                        </div>
+
+                        <div class="info">
+                            <p class="decus-username">{{ logged_in_user.username }}'s Cart</p>
+                            <div class="decus-cart-short">
+                                <p class="cart-short">Empty</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cartModal-actions">
+                        <a href="/logout" class="log-out" rel="noopener noreferrer">Log out</a>
+                        <div class="currency-selector">
+                            <a type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">
+                                {% if request.session.chosen_currency %} {{ request.session.chosen_currency }}{% else %}{{ webstore.currency }}{% endif %} <span class="fa fa-caret-down"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="/currency/AUD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'AUD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}AUD</a></li>
+                                <li><a href="/currency/BRL?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'BRL' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}BRL</a></li>
+                                <li><a href="/currency/CAD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CAD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CAD</a></li>
+                                <li><a href="/currency/CHF?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CHF' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CHF</a></li>
+                                <li><a href="/currency/CNY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CNY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CNY</a></li>
+                                <li><a href="/currency/CZK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'CZK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}CZK</a></li>
+                                <li><a href="/currency/DKK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'DKK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}DKK</a></li>
+                                <li><a href="/currency/EUR?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'EUR' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}EUR</a></li>
+                                <li><a href="/currency/GBP?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'GBP' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}GBP</a></li>
+                                <li><a href="/currency/HKD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'HKD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}HKD</a></li>
+                                <li><a href="/currency/HUF?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'HUF' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}HUF</a></li>
+                                <li><a href="/currency/ILS?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'ILS' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}ILS</a></li>
+                                <li><a href="/currency/JPY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'JPY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}JPY</a></li>
+                                <li><a href="/currency/MXN?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'MXN' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}MXN</a></li>
+                                <li><a href="/currency/MYR?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'MYR' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}MYR</a></li>
+                                <li><a href="/currency/NOK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'NOK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}NOK</a></li>
+                                <li><a href="/currency/NZD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'NZD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}NZD</a></li>
+                                <li><a href="/currency/PHP?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'PHP' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}PHP</a></li>
+                                <li><a href="/currency/PLN?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'PLN' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}PLN</a></li>
+                                <li><a href="/currency/RUB?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'RUB' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}RUB</a></li>
+                                <li><a href="/currency/SEK?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'SEK' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}SEK</a></li>
+                                <li><a href="/currency/SGD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'SGD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}SGD</a></li>
+                                <li><a href="/currency/THB?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'THB' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}THB</a></li>
+                                <li><a href="/currency/TRY?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'TRY' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}TRY</a></li>
+                                <li><a href="/currency/USD?next={% firstof request.path '/' %}">{% if request.session.chosen_currency == 'USD' %}<div class="float-right"><i class="fa fa-check"></i></div>{% endif %}USD</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="modal__content" id="cart-modal-content">
+                    <ul class="cartModal-items">
+                        <li class="cartModal-item">Your cart appears to be empty.</li>
+                    </ul>
+                </main>
+                <footer class="modal__footer">
+                    <span class="cartModal-continue-shopping" data-micromodal-close aria-label="Close this dialog window">Continue Shopping</span>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+
+
+    <div class="modal micromodal-slide " id="cart-modal" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+            <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+
+                <main class="modal__content" id="cart-modal-content">
+                    <ul class="cartModal-items">
+                        <li class="cartModal-item">
+                            <div class="itemName">Iron Donator Rank | Lifetime </div>
+                            <div class="right">
+                                <p class="price">2.99 <small>USD</small></p>
+                                <div class="item-actions">
+                                    <a class="cartModal-remove" href="/checkout/packages/remove/2423998"><i class="fa fa-times"></i></a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </main>
+
+                <footer class="modal__footer">
+                    <span class="cartModal-continue-shopping" data-micromodal-close aria-label="Close this dialog window">Continue Shopping</span>
+                    <a href=/checkout/basket class="checkout-btn btn btn-primary">Proceed to Checkout <i class="fas fa-arrow-right"></i></a>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal micromodal-slide" id="ip-modal" aria-hidden="true">
+        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+            <div class="modal__container text-center" role="dialog" aria-modal="true" aria-labelledby="ip-modal-title">
+                <header class="modal__header">
+                    <h4 class="modal__title" id="ip-modal-title">
+                        Server IP Copied
+                    </h4>
+                </header>
+                <main class="modal__content" id="ip-modal-content">
+                    <p>
+                        We hope to see you online soon!
+                    </p>
+                </main>
+                <footer class="modal__footer">
+                    <button type="button" class="modal__btn btn btn-default" data-micromodal-close>Close</button>
+                </footer>
+            </div>
+        </div>
+    </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<!--<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>-->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
 <script src="/static/assets/js/store.js"></script>
-<script src="/static/default/js/bootstrap.min.js"></script>
+<script src="https://cdn.rohanmcdermott.com/sites/donationstore/verve/js/rohan.js"></script>
+<script src="https://cdn.rohanmcdermott.com/sites/donationstore/verve/js/site.js"></script>
+<!--<script src="/static/edit/js/bootstrap.min.js"></script>-->
+<!--CLIPBOARD CDN-->
+<script src="https://cdn.rohanmcdermott.com/assets/js/clipboard.js"></script>
+
+
 <script>
-    $(function () {
+    var ip = '{{ webstore_config.serverIP }}:25565';
+
+    $(document).ready(function() {
+        $.getJSON('https://eu.mc-api.net/v3/server/info/' + ip, function(jd) {
+            if (jd.error) {
+                $('.counter').html('0');
+            } else {
+                $('.counter').html(jd.players.online);
+            }
+        });
+    });
+    updateCount();
+
+    function updateCount() {
+        $.getJSON('https://eu.mc-api.net/v3/server/info/' + ip, function(jd) {
+            if (jd.error) {
+                $('.counter').html('0');
+            } else {
+                $('.counter').html(jd.players.online);
+            }
+        });
+        setTimeout(updateCount, 59000);
+    }
+
+    new Clipboard('#mc-server', {
+        text: function() {
+            return '{{ webstore_config.serverIP }}';
+        }
+    });
+
+</script>
+<script>
+    $.get('https://discordapp.com/api/guilds/{{ webstore_config.discordID }}/embed.json', function(e) {
+        var members = e['members'];
+        var playerCount = members.length;
+        $('.discord-count').html(playerCount);
+    });
+
+</script>
+<!--IP SWEET ALERT-->
+<script src="https://unpkg.com/sweetalert@2.1.2/dist/sweetalert.min.js"></script>
+
+<script>
+    $("#mc-server").click(function() {
+        swal({
+            title: "You copied the ip!",
+            text: "Come join us on our server!",
+            icon: "success",
+            button: "Close",
+            timer: 150000
+        });
+    });
+
+</script>
+<script>
+    // mobile nav
+    const nav = document.querySelector("#header nav");
+    const icon = document.querySelector(".decus-mobile-menu");
+
+    icon.addEventListener("click", () => {
+        if (nav.getAttribute("data-mobile") === "true") {
+            nav.setAttribute("data-mobile", "false");
+            document.body.className = '';
+        } else {
+            nav.setAttribute("data-mobile", "true");
+            document.body.className = 'is-modalOpen';
+        }
+    });
+
+    // custom modals
+    $(".toggle-modal").unbind("click");
+
+    let modalConfig = {
+        onShow: onModalOpen,
+        onClose: onModalClose,
+        disableFocus: true,
+        awaitOpenAnimation: true,
+        awaitCloseAnimation: true,
+    }
+
+    $(".toggle-modal").on("click", function decusOnClick(e) {
+        remote = $(this).data("remote");
+
+        $.ajax({
+            url: remote,
+            success: function(data) {
+                $('#decus-modal').html(data);
+                MicroModal.show("decus-modal", modalConfig);
+            },
+            error: function(request, status, error) {
+                alert(request.responseText);
+            },
+            async: true
+        });
+
+        e.preventDefault();
+    });
+
+    MicroModal.init(modalConfig);
+
+    function onModalOpen(modal) {
+        $("body").addClass("modal-open");
+    }
+
+    function onModalClose(modal) {
+        modal.addEventListener("animationend", () => {
+            $("body").removeClass("modal-open");
+        }, {
+            once: true
+        });
+    }
+
+</script>
+<script>
+    $(function() {
         $('[data-toggle="tooltip"]').tooltip();
     });
 
-    {% for virtual_currency in request.session.virtual_currencies %}
-        $('#{{ virtual_currency.code }}Amount').bind('keyup change', function() {
-            var amount = $(this).val() / {{ virtual_currency.exchange_rate }};
-            $('#{{ virtual_currency.code }}Real').html(amount);
-        });
-    {% endfor %}
+    { %
+        for virtual_currency in request.session.virtual_currencies %
+    }
+    $('#{{ virtual_currency.code }}Amount').bind('keyup change', function() {
+        var amount = $(this).val() / {
+            {
+                virtual_currency.exchange_rate
+            }
+        };
+        $('#{{ virtual_currency.code }}Real').html(amount);
+    }); { % endfor %
+    }
+
 </script>
+
 </html>

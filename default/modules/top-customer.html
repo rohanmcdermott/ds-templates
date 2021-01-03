@@ -3,7 +3,8 @@
 {% load modules %}
 
 {% top_customers_module module as top_customer %}
- <div class="card">
+<!--
+<div class="card">
     <div class="card-header">
         {{ module.header }}
     </div>
@@ -16,19 +17,48 @@
             <div class="col-md-10">
                 <div style="font-size: 15px">
                     <strong>{{ top_customer.customer.username }}</strong>
-                    <br/>
+                    <br />
                     <div style="margin-top:0px">
                         {% if top_customer.module.display_amount %}
-                            {{ webstore.currency }}{{ top_customer.customer.payment__amount__sum }}
+                        {{ webstore.currency }}{{ top_customer.customer.payment__amount__sum }}
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
         {% else %}
-            No customer for that period.
+        No customer for that period.
         {% endif %}
     </div>
 </div>
-<br/>
+-->
+<!--<br />-->
 
+
+<div class="panel panel-default module decus-top-donator">
+    <i class="fas fa-star"></i>
+    <div class="panel-heading">{{ module.header }}</div>
+    <div class="panel-body">
+        {% if top_customer.customer %}
+
+        <div class="top-donator">
+            <div class="avatar">
+                <img src="https://crafatar.com/renders/body/{{ top_customer.customer.uuid }}?overlay" width="40">
+            </div>
+            <div class="info">
+                <div class="ign">{{ top_customer.customer.username }}</div>
+                <div class="amount">
+                    Donated the most
+
+                    this month.
+                </div>
+            </div>
+        </div>
+        {% else %}
+        No customer for that period.
+
+        {% endif %}
+
+
+    </div>
+</div>

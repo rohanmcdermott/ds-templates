@@ -1,4 +1,4 @@
-{% extends "store/default/base.html" %}
+{% extends "store/verve/base.html" %}
 
 {% block title %}{{ webstore.name }} | Payment Cancelled{% endblock %}
 
@@ -9,7 +9,7 @@
 
 {% block content %}
 
-    {% include 'store/default/nav.html' %}
+    {% include 'store/verve/nav.html' %}
 
     <!-- Break -->
     <br/>
@@ -27,10 +27,10 @@
         <!-- Start Payment Cancelled -->
         <div class="card">
             <div class="card-header">
-                {{ language.translations.payment_cancelled }}
+                Payment Cancelled
             </div>
             <div class="card-body">
-                <p>{{ language.translations.cancelled_your_payment }}</p>
+                <p>Sorry to see you cancelled your payment. We hope you come back again soon!</p>
             </div>
         </div>
         <!-- End Payment Cancelled -->
@@ -38,6 +38,6 @@
     </div>
     <!-- End Main Login Content -->
 
-    {% include 'store/default/footer.html' %}
+    {% include 'store/verve/footer.html' %}
 
 {% endblock %}

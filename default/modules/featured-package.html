@@ -6,19 +6,17 @@
 
 {% featured_package_module module as featured_package %}
 
-<div class="card">
-    <div class="card-header">
-        {{ module.header }}
-    </div>
-    <div class="card-body">
-        <div class="text-center">
+<div class="panel panel-default module featured-package">
+    <div class="panel-heading">{{ module.header }}</div>
+    <div class="panel-body">
+            
+            <div class="col-md-6">
                 {% if featured_package.package.image %}
                     <a data-toggle="modal" data-target="#package-{{ featured_package.package.id }}">
-                        <img src="/{{ featured_package.package.image.url }}"
+                        <img class="img-responsive" src="/{{ featured_package.package.image.url }}"
                              data-toggle="tooltip"
                              data-html="true"
                              title="{{ language.translations.click_more_details }}"
-                             width="190px" height="190px"
                              style="border-radius: 5px;" alt="packageImage"/></a>
                 {% else %}
                     <a data-toggle="modal" data-target="#package-{{ featured_package.package.id }}"><img
@@ -26,39 +24,11 @@
                             data-html="true" title="{{ language.translations.click_more_details }}" width="190px"
                             height="190px" style="border-radius: 5px;" alt="packageImage"/></a>
                 {% endif %}
-            </div>
+</div>
+                    <div class="col-md-6">
 
-            <div style="padding:8px; margin:0px; padding-bottom: 0px;">
-                <div class="float-right">
-                    {# If the package is already in the cart then we display a remove button not a buy button #}
-                    {# First lets see if the cart has any contents #}
-                    {% if cart|length > 0 %}
-                        {# If there is stuff in the cart #}
-                        {# Check if that package is already in the cart #}
-                        {% if cart|contains_package:featured_package.package.id %}
-                            <form name="remove-from-cart" method="post" action="">
-                                <input type="hidden" name="remove" value="true">
-                                <input type="hidden" name="package_id" value="{{ featured_package.package.id }}">
-                                {% csrf_token %}
-                                <input type="submit" value="{{ language.translations.remove }}"
-                                       class="btn btn-sm btn-danger btn-block">
-                            </form>
-                        {% else %}
-                            {# If not then just display the buy button #}
-                            <button type="button" class="btn btn-sm btn-secondary btn-block" data-toggle="modal"
-                                    data-target="#package-{{ featured_package.package.id }}">
-                                <i class="fa fa-cart-plus"></i> {{ language.translations.buy }}
-                            </button>
-                        {% endif %}
-                        {# If not then just display the buy button #}
-                    {% else %}
-                        <button type="button" class="btn btn-sm btn-secondary btn-block" data-toggle="modal"
-                                data-target="#package-{{ featured_package.package.id }}">
-                            <i class="fa fa-cart-plus"></i> {{ language.translations.buy }}
-                        </button>
-                    {% endif %}
-                </div>
-                <p style="padding-top:0px; margin:0px; font-size: 12px;">{{ featured_package.package.name }}<br/>
+            <div style="margin:0px; padding-bottom: 0px;">
+                <p style="padding-top:0px; margin:0px;">{{ featured_package.package.name }}<br/>
                     {% if featured_package.package.show_package_until %}
                         <div style="font-size: 12px;" class="text text-danger"
                              id="show_package_until_id_{{ featured_package.package.id }}">
@@ -102,14 +72,48 @@
                         {% if 'allow_customer_to_change_price' in package_on_sale %}
                             {{ language.translations.you_decide_how_much }}
                         {% else %}
-                            <span class="text-danger"><s>{% get_price_using_currency package_on_sale.original_price webstore %}</s></span>
-                            <span class="text-success">{% get_price_using_currency package_on_sale.sale_price webstore %}</span>
+                            <span style="font-size: 12px;" class="text-danger"><s>{% get_price_using_currency package_on_sale.original_price webstore %}</s></span>
+                            <span style="font-size: 12px;" class="text-success">{% get_price_using_currency package_on_sale.sale_price webstore %}</span>
                         {% endif %}
                     {% else %}
-                        {% get_price_using_currency featured_package.package.price webstore %}
+                <span style="font-size: 12px;">{% get_price_using_currency featured_package.package.price webstore %}</span>
                     {% endif %}
                 {% endif %}
+                <div class="float-right">
+                    {# If the package is already in the cart then we display a remove button not a buy button #}
+                    {# First lets see if the cart has any contents #}
+                    {% if cart|length > 0 %}
+                        {# If there is stuff in the cart #}
+                        {# Check if that package is already in the cart #}
+                        {% if cart|contains_package:featured_package.package.id %}
+                            <form name="remove-from-cart" method="post" action="">
+                                <input type="hidden" name="remove" value="true">
+                                <input type="hidden" name="package_id" value="{{ featured_package.package.id }}">
+                                {% csrf_token %}
+                                <input type="submit" value="{{ language.translations.remove }}"
+                                       class="btn btn-sm btn-danger btn-block">
+                            </form>
+                        {% else %}
+                            {# If not then just display the buy button #}
+                            <button type="button" class="btn btn-sm btn-primary btn-block" data-toggle="modal"
+                                    data-target="#package-{{ featured_package.package.id }}">
+                                 {{ language.translations.buy }}
+                            </button>
+                        {% endif %}
+                        {# If not then just display the buy button #}
+                    {% else %}
+                        <button type="button" class="btn btn-sm btn-primary btn-block" data-toggle="modal"
+                                data-target="#package-{{ featured_package.package.id }}">
+                             {{ language.translations.buy }}
+                        </button>
+                    {% endif %}
+                </div>
+                
+
             </div>
+    </div>
+        
+        
             <!-- Add to Cart pop up Modal -->
             <div class="modal fade" id="package-{{ featured_package.package.id }}" tabindex="-1" role="dialog"
                  aria-labelledby="addToCart"
@@ -170,7 +174,7 @@
                                 {% endif %}
                                 {% if webstore.allow_gifting and not featured_package.package.disable_gifting %}
                                     <button type="button" class="btn btn-success dropdown-toggle"
-                                            data-toggle="dropdown">
+                                            data-toggle="">
                                         {{ language.translations.gift_this_package }}
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right" style="width: 100%; padding: 10px;">
@@ -190,4 +194,6 @@
             </div>
         </div>
     </div>
-<br/>
+
+
+

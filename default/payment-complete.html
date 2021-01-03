@@ -1,4 +1,4 @@
-{% extends "store/default/base.html" %}
+{% extends "store/verve/base.html" %}
 
 {% block title %}{{ webstore.name }} | Payment Complete{% endblock %}
 
@@ -9,7 +9,7 @@
 
 {% block content %}
 
-    {% include 'store/default/nav.html' %}
+    {% include 'store/verve/nav.html' %}
 
     <!-- Break -->
     <br/>
@@ -33,10 +33,10 @@
                 {% if webstore.payment_complete_page %}
                     <p>{{ webstore.payment_complete_page|safe }}</p>
                 {% else %}
-                    <p>{{ language.translations.payment_complete }} <br/><br/>
-                    {{ language.translations.how_to_receive_commands }}<br/><br/>
+                    <p>Thank you for your payment. It may take a few moments for us to receive back a response from the payment gateway you chose. <br/><br/>
+                        To receive your purchase please login to our server and wait, you will be awarded within the next 5 minutes.<br/><br/>
 
-                    {{ language.translations.thank_you_for_purchasing }}</p>
+                        Thank you for purchasing items with us today.</p>
                 {% endif %}
             </div>
         </div>
@@ -45,6 +45,6 @@
     </div>
     <!-- End Main Login Content -->
 
-    {% include 'store/default/footer.html' %}
+    {% include 'store/verve/footer.html' %}
 
 {% endblock %}

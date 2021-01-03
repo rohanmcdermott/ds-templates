@@ -3,6 +3,7 @@
 {% load modules %}
 
 {% gift_card_balance_module module as gift_card_balance %}
+<!--
     <div class="card">
         <div class="card-header">
             {{ module.header }}
@@ -25,3 +26,30 @@
         </div>
     </div>
 <br/>
+-->
+
+
+<div class="panel panel-default module box-container" id="giftcardbalance">
+    <div class="panel-heading">{{ module.header }}</div>
+    <div class="panel-body" style="width:auto;float:none;">
+        <div class="giftcardbalance" style="text-align:center;">
+            <p>Check {{ module.header }}</p>
+            <form name="check_gift_card_balance" action='' method='post'>
+                <div class="input-group">
+                    <input type="text" name="gift_card_number" placeholder="{{ language.translations.gift_card_number }}" class="form-control" value="" />
+                    <div class="input-group-btn"><button class="btn btn-default" style="text-transform: capitalize;">{{ language.translations.check }} <i class="fa fa-arrow-right"></i></button></div>
+                </div>
+                                {% csrf_token %}
+
+            </form>
+
+            {% if gift_card %}
+            <br>
+            <h6><strong class="pull-left">{{ language.translations.starting_balance }}</strong><span class="pull-right">{{ webstore.currency }}{{ gift_card.start_balance }}</span></h6>
+            <br />
+            <h6><strong class="pull-left">{{ language.translations.current_balance }}</strong><span class="pull-right">{{ webstore.currency }}{{ gift_card.current_balance }}</span></h6>
+
+            {% endif %}
+        </div>
+    </div>
+</div>

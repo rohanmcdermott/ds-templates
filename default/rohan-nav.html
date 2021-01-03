@@ -1,0 +1,155 @@
+{% load cart %}
+
+{% load modules %}
+
+{% load currency %}
+<div class="layout2-sidebar">
+    {% is_logged_in webstore as logged_in %}
+    {% if logged_in %}
+    {% get_user webstore as logged_in_user %}
+
+    <div class="panel panel-default module decus-user-module">
+        <div class="decus-user-module-container">
+            <div class="user">
+                <div class="decus-avatar">
+                    <img src="https://minotar.net/avatar/{{ logged_in_user.username }}/32" />
+                </div>
+                <div>
+                    <p class="shopping-as">Shopping as</p>
+                    <a href="/logout" class="a-concealed toggle-tooltip" data-original-title="Log out">
+                        <p class="decus-username">{{ logged_in_user.username }}</p>
+                    </a>
+                </div>
+            </div>
+            <!--
+                <div class="cart-prompt" data-micromodal-trigger="cart-modal" data-badge="{{ cart|length }}">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+-->
+            {% if cart %}
+            <a href="/checkout" class="cart-prompt" data-badge="{{ cart|length }}">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+    {% else %}
+
+
+    <div class="panel panel-default module decus-user-module">
+        <div class="decus-user-module-container">
+            <div class="user">
+                <div class="decus-avatar">
+                    <img src="https://minotar.net/avatar/steve/32" />
+                </div>
+                <div>
+                    <p class="shopping-as">Shopping as</p>
+                    <a class="a-concealed toggle-tooltip" data-original-title="Add an item to login">
+                        <p class="decus-username">Guest</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">{{ webstore_config.serverName }}</a>
+        </div>
+
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class=""><a href="/">{{ language.translations.home }}</a></li>
+
+                {% for category in category_tree %}
+                {% if category.sub_categories %}
+                {# Now that we know there are subcategories, make a dropdown. #}
+
+
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ category.parent.name }} <i class="fa fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+
+                        {# Put the top parent category in here so it's clickable #}
+                        {% if category.parent.do_not_display_in_subcategory_dropdown is False %}
+                        <a class="dropdown-item" href="/category/{% if category.parent.slug %}{{ category.parent.slug }}{% else %}{{ category.parent.id }}{% endif %}">
+                            {{ category.parent.name }}
+                        </a>
+
+
+                        <li><a href="/category/{% if category.parent.slug %}{{ category.parent.slug }}{% else %}{{ category.parent.id }}{% endif %}">{{ category.parent.name }}</a></li>
+
+                        {% endif %}
+
+                        {% for sub_category in category.sub_categories %}
+                        {% if sub_category.do_not_display_in_subcategory_dropdown is False %}
+
+                        <li><a href="/category/{% if sub_category.slug %}{{ sub_category.slug }}{% else %}{{ sub_category.id }}{% endif %}">{{ sub_category.name }}</a></li>
+
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% else %}
+
+                {# If not just list the category as normal #}
+
+                <li><a href="/category/{% if category.parent.slug %}{{ category.parent.slug }}{% else %}{{ category.parent.id }}{% endif %}">{{ category.parent.name }}</a></li>
+                {% endif %}
+                {% endfor %}
+
+                {% for page in pages %}
+                {% if page.status and page.add_to_menu %}
+                {% if page.logged_in_to_view %}
+                {% if request.session.logged_in %}
+                <li><a href="/{{ page.url }}">{{ page.title }}</a></li>
+                {% endif %}
+                {% else %}
+                <li><a href="/{{ page.url }}">{{ page.title }}</a></li>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+
+
+
+                {% if cart %}
+                <li><a href="/checkout">{{ language.translations.checkout }}</a></li>
+
+                {% endif %}
+
+
+            </ul>
+        </div>
+    </nav>
+
+
+
+    {% if webstore.support_tickets %}
+
+
+    <div class="panel panel-default module box-container support_tickets">
+        <div class="panel-heading">{{ language.translations.need_support }}</div>
+        <div class="panel-body" style="width:auto;float:none;">
+            <div class="giftcardbalance" style="text-align:center;">
+                <p>{{ language.translations.contact_us_by_support }}</p>
+                <br />
+                <a href="/support" class="btn btn-default btn-block">{{ language.translations.let_me_open_a_support_ticket }}</a>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    {% endif %}
+
+</div>
