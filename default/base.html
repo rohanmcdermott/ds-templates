@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>{% block title %}{% endblock %}</title>
     {% load static %}
-    {% load config %}
     {% load currency %}
+    {% load config %}
     {% load cart %}
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -41,8 +40,8 @@
 </head>
 
 <body data-layout="3">
-    {% block content %}{% endblock content %}
-    {% if stripe_gateway %}
+{% block content %}{% endblock content %}
+{% if stripe_gateway %}
     <script>
         // Create a Stripe client.
         var stripe = Stripe('{{ stripe_gateway.publishable_key }}');
@@ -121,7 +120,6 @@
                         var displayError = document.getElementById('card-errors');
 
                         displayError.textContent = result.error;
-                        console.log(result.error.message);
                     } else {
                         if (result.paymentIntent.status === 'succeeded') {
                             window.location.replace('/payment-complete');
@@ -440,6 +438,18 @@
         });
     });
 
+</script>
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    {% for virtual_currency in request.session.virtual_currencies %}
+        $('#{{ virtual_currency.code }}Amount').bind('keyup change', function() {
+            var amount = $(this).val() / {{ virtual_currency.exchange_rate }};
+            $('#{{ virtual_currency.code }}Real').html(amount);
+        });
+    {% endfor %}
 </script>
 <script>
     // mobile nav
